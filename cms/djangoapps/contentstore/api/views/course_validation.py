@@ -9,6 +9,7 @@ from pytz import UTC
 from contentstore.course_info_model import get_course_updates
 from contentstore.views.certificates import CertificateManager
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
+from xmodule.course_metadata_utils import DEFAULT_GRADING_POLICY
 from xmodule.modulestore.django import modulestore
 
 from .utils import get_bool_param, course_author_access_required
@@ -195,8 +196,10 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
         )
 
     def _grades_validation(self, course):
+        has_grading_policy = self._has_grading_policy(course)
         sum_of_weights = course.grader.sum_of_weights
         return dict(
+            has_grading_policy=has_grading_policy,
             sum_of_weights=sum_of_weights,
         )
 
@@ -276,3 +279,36 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
 
     def _has_start_date(self, course):
         return not course.start_date_is_still_default
+
+    def _has_grading_policy(self, course):
+
+        grading_policy_formatted = {}
+        default_grading_policy_formatted = {}
+
+        for grader, assignment_type, weight in course.grader.subgraders:
+            grading_policy_formatted[assignment_type] = {
+                'type': assignment_type,
+                'short-label': grader.short_label,
+                'min-count': grader.min_count,
+                'drop-count': grader.drop_count,
+                'weight': weight,
+            }
+
+        for assignment in DEFAULT_GRADING_POLICY['GRADER']:
+            default_grading_policy_formatted[assignment['type']] = {
+                'type': assignment['type'],
+                'short-label': assignment['short_label'],
+                'min-count': assignment['min_count'],
+                'drop-count': assignment['drop_count'],
+                'weight': assignment['weight'],
+            }
+
+        if len(grading_policy_formatted) != len(default_grading_policy_formatted):
+            return True
+        else:
+            for assignment_type in grading_policy_formatted:
+                if (assignment_type not in default_grading_policy_formatted or
+                        grading_policy_formatted[assignment_type] != default_grading_policy_formatted[assignment_type]):
+                    return True
+
+        return False
