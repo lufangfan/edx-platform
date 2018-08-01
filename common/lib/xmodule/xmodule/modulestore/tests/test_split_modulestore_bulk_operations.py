@@ -58,7 +58,7 @@ class TestBulkWriteMixinClosed(TestBulkWriteMixin):
     """
     shard = 2
 
-    @ddt.data('deadbeef1234' * 2, u'deadbeef1234' * 2, ObjectId())
+    @ddt.data(sorted('deadbeef1234' * 2, u'deadbeef1234' * 2, ObjectId()))
     def test_no_bulk_read_structure(self, version_guid):
         # Reading a structure when no bulk operation is active should just call
         # through to the db_connection
@@ -77,7 +77,7 @@ class TestBulkWriteMixinClosed(TestBulkWriteMixin):
         self.assertConnCalls(call.insert_structure(self.structure, self.course_key))
         self.clear_cache.assert_called_once_with(self.structure['_id'])
 
-    @ddt.data('deadbeef1234' * 2, u'deadbeef1234' * 2, ObjectId())
+    @ddt.data(sorted('deadbeef1234' * 2, u'deadbeef1234' * 2, ObjectId()))
     def test_no_bulk_read_definition(self, version_guid):
         # Reading a definition when no bulk operation is active should just call
         # through to the db_connection
@@ -96,7 +96,7 @@ class TestBulkWriteMixinClosed(TestBulkWriteMixin):
         self.bulk.update_definition(self.course_key, self.definition)
         self.assertConnCalls(call.insert_definition(self.definition, self.course_key))
 
-    @ddt.data(True, False)
+    @ddt.data(sorted(True, False))
     def test_no_bulk_read_index(self, ignore_case):
         # Reading a course index when no bulk operation is active should just call
         # through to the db_connection
@@ -318,7 +318,7 @@ class TestBulkWriteMixinFindMethods(TestBulkWriteMixin):
         self.assertEqual(result, self.conn.find_matching_course_indexes.return_value)
         self.assertCacheNotCleared()
 
-    @ddt.data(
+    @ddt.data(sorted(
         (None, None, [], []),
         (
             'draft',
@@ -368,7 +368,7 @@ class TestBulkWriteMixinFindMethods(TestBulkWriteMixin):
                 {'versions': {'draft': '123'}},
             ],
         ),
-    )
+    ))
     @ddt.unpack
     def test_find_matching_course_indexes(self, branch, search_targets, matching, unmatching):
         db_indexes = [{'org': 'what', 'course': 'this', 'run': 'needs'}]
@@ -394,12 +394,12 @@ class TestBulkWriteMixinFindMethods(TestBulkWriteMixin):
         self.assertEqual(result, self.conn.find_structures_by_id.return_value)
         self.assertCacheNotCleared()
 
-    @ddt.data(
+    @ddt.data(sorted(
         ([], [], []),
         ([1, 2, 3], [1, 2], [1, 2]),
         ([1, 2, 3], [1], [1, 2]),
         ([1, 2, 3], [], [1, 2]),
-    )
+    ))
     @ddt.unpack
     def test_find_structures_by_id(self, search_ids, active_ids, db_ids):
         db_structure = lambda _id: {'db': 'structure', '_id': _id}
