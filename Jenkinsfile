@@ -6,10 +6,10 @@ def runPythonTests() {
                 userRemoteConfigs: [[credentialsId: 'jenkins-worker',
                 refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
                 url: 'git@github.com:edx/edx-platform.git']]]
-            console_output = sh(returnStdout: true, script: 'bash scripts/all-tests.sh').trim()
-            dir('stdout') {
-                writeFile file: "${TEST_SUITE}-stdout.log", text: console_output
-            }
+            sh 'bash scripts/all-tests.sh'
+            // dir('stdout') {
+            //     writeFile file: "${TEST_SUITE}-stdout.log", text: console_output
+            // }
             stash includes: 'reports/**/*coverage*', name: "${TEST_SUITE}-reports"
         }
     }
