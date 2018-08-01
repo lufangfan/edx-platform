@@ -48,7 +48,7 @@ pipeline {
             parallel {
                 stage("lms-unit") {
                     environment {
-                        NO_PREREQ_INSTALL="True"
+                        // NO_PREREQ_INSTALL="True"
                         TEST_SUITE = "lms-unit"
                         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
                         XDIST_NUM_TASKS = 10
