@@ -25,6 +25,7 @@ LOGGED_IN_COOKIE_NAMES = (
     settings.JWT_AUTH['JWT_AUTH_COOKIE'],
 )
 
+
 def standard_cookie_settings(request):
     """ Returns the common cookie settings (e.g. expiration time). """
 
@@ -97,14 +98,15 @@ def set_logged_in_cookies(request, response, user):
 
     Returns:
         HttpResponse
-
+ 
     """
-    _set_deprecated_logged_in_cookie(response, request)
-    set_user_info_cookie(response, request)
-    _set_jwt_cookie(response, request)
+    if user.is_authenticated() and not user.is_anonymous:
+        _set_deprecated_logged_in_cookie(response, request)
+        set_user_info_cookie(response, request)
+        _set_jwt_cookie(response, request)
 
-    # give signal receivers a chance to add cookies
-    CREATE_LOGON_COOKIE.send(sender=None, user=user, response=response)
+        # give signal receivers a chance to add cookies
+        CREATE_LOGON_COOKIE.send(sender=None, user=user, response=response)
 
     return response
 
@@ -141,7 +143,7 @@ def _set_jwt_cookie(response, request):
     """ Sets a cookie containing a JWT on the response. """
     cookie_settings = standard_cookie_settings(request)
     _set_jwt_expiration(cookie_settings)
-    
+
     jwt = _build_jwt(request, cookie_settings['max_age'])
     response.set_cookie(
         settings.JWT_AUTH['JWT_AUTH_COOKIE'].encode('utf-8'),

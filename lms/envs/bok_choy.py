@@ -246,6 +246,13 @@ WAFFLE_OVERRIDE = True
 
 COMPLETION_BY_VIEWING_DELAY_MS = 1000
 
+################################ JWTs ##############################
+
+JWT_AUTH.update({
+    "JWT_PRIVATE_SIGNING_JWK": '{"e": "AQAB", "d": "ZyqyRf6fprfbj3i3a6Ot4VlxWGyj7C4hL_CC_mFYKVSkSE6vDnuoWkK6sxqpORQZL0ObiTRr5srRFFGs-9RKw5jBzfssRFR65OAw7uAk0PxCIEeP6TTyFS1tvTA02UXQ_VLsnhi4wA2ks13yitc99vNcKiQm_KBeqjOodLZoU11KhtZhh_W_Z0H24T0FYlBAh6XviGBHHNUOwJdhOrNZteb6S342yQVgDpeHyuNt1LnveVCk9HHVhdzDYNO-kXJyXrehsfyRhlR60N0KbPw2YuAHa_oUuedBlq9rknj5k2EJtLJ7wU5OHbGXX04x7RjtKI-tRevnZJA0z5xSnZU3LQ", "n": "4xy0DeL9_IfD51Kqq3M2DMxa-j4mF7DmXvUb0BsXhSSJ4urhIFWjHsf_dyXt4SHGeZtfFUc0tcqfyjpFLPZ9fGdSY-Mb7hGUGfG7gAC4PLgQpwsztXP5dzoSy1wrgc4aAUNpipuXUi5Lp7W4VUjAS4vIr6pczL1Le9ExKyuyXYCUUj72Hswi7g9sGZe6ADyP5pPdUsgSMQQ7kjaZ0ApBT7YDwADB7_HiA_jAEPqmK9cuFQX1dystT-bjGIcZDfKLyZQAKcKJOwXHeRi0SySHqqQkBCbrfK-8oZCnD26p_JX4VUINjeqjtPLMl1M4zHhf_C7BUJj_kcfuc58c3DYprw", "q": "-seCXWembdEd_GwksIhWdyNE7KlPtbbRZX0MV6_eCBNGRNxWQtYFGvFt2OEs6LQnrAeyA5GiCibdeL-RgYbApn0RSdwAaVjaFf1dtruNA2XgNwyMIYAnqF_ChP7ASQSrYgIBJRtk91IrOTAAWEkti1zvu-oBqvdfoTR7B6Pzvis", "p": "59cQMakh9IOpI1MBNIM9aMHO4E3FU-YV_5beY8yTZGoUOTvG2p6hIFB5AUgNIGlzpdkYijZGTQ2ynkBAxl7B5wI5CjnOW1AWvp2S0BsSmNDBYLT7o5zvceOX3KDSzeG8_nRFxFQde5yW9LDLRFZlyEPmMHkOZCIpLCMnatrZRI0", "kid": "bokchoy-tests", "kty": "RSA"}',
+    "JWT_PUBLIC_SIGNING_JWK_SET": '{"keys": [{"kid": "bokchoy-tests", "e": "AQAB", "kty": "RSA", "n": "4xy0DeL9_IfD51Kqq3M2DMxa-j4mF7DmXvUb0BsXhSSJ4urhIFWjHsf_dyXt4SHGeZtfFUc0tcqfyjpFLPZ9fGdSY-Mb7hGUGfG7gAC4PLgQpwsztXP5dzoSy1wrgc4aAUNpipuXUi5Lp7W4VUjAS4vIr6pczL1Le9ExKyuyXYCUUj72Hswi7g9sGZe6ADyP5pPdUsgSMQQ7kjaZ0ApBT7YDwADB7_HiA_jAEPqmK9cuFQX1dystT-bjGIcZDfKLyZQAKcKJOwXHeRi0SySHqqQkBCbrfK-8oZCnD26p_JX4VUINjeqjtPLMl1M4zHhf_C7BUJj_kcfuc58c3DYprw"}]}',
+})
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 try:
