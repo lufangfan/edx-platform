@@ -62,7 +62,7 @@ pipeline {
                     environment {
                         TEST_SUITE = "cms-unit"
                         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
-                        XDIST_NUM_TASKS = 10
+                        XDIST_NUM_TASKS = 5
                     }
                     steps {
                         script {
