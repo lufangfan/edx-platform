@@ -60,7 +60,6 @@ pipeline {
                 stage("cms-unit") {
                     agent { label "jenkins-worker" }
                     environment {
-                        NO_PREREQ_INSTALL="True"
                         TEST_SUITE = "cms-unit"
                         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
                         XDIST_NUM_TASKS = 2
@@ -81,7 +80,6 @@ pipeline {
                 stage("commonlib-unit") {
                     agent { label "jenkins-worker" }
                     environment {
-                        NO_PREREQ_INSTALL="True"
                         TEST_SUITE = "commonlib-unit"
                         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
                         XDIST_NUM_TASKS = 3
@@ -98,6 +96,39 @@ pipeline {
                             }
                         }
                     }
+                }
+            }
+        }
+        stage('Run coverage') {
+            environment {
+                CODE_COV_TOKEN = credentials('CODE_COV_TOKEN')
+                TARGET_BRANCH = "origin/master"
+                CI_BRANCH = "${ghprbSourceBranch}"
+                SUBSET_JOB = "null"
+            }
+            steps {
+                ansiColor('gnome-terminal') {
+                    sshagent(credentials: ['jenkins-worker'], ignoreMissing: true) {
+                        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '${sha1}']],
+                            doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
+                            userRemoteConfigs: [[credentialsId: 'jenkins-worker',
+                            refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
+                            url: 'git@github.com:edx/edx-platform.git']]]
+                        unstash 'lms-unit-reports'
+                        unstash 'cms-unit-reports'
+                        unstash 'commonlib-unit-reports'
+                        sh "./scripts/jenkins-report.sh"
+                    }
+                }
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
+                        reportDir: 'reports', reportFiles: 'diff_coverage_combined.html',
+                        reportName: 'Diff Coverage Report', reportTitles: ''])
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
+                        reportDir: 'reports/cover', reportFiles: 'index.html',
+                        reportName: 'Coverage.py Report', reportTitles: ''])
                 }
             }
         }
