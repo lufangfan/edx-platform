@@ -1,8 +1,12 @@
 def runPythonTests() {
     ansiColor('gnome-terminal') {
         sshagent(credentials: ['jenkins-worker', 'jenkins-worker-pem'], ignoreMissing: true) {
-            console_output = sh returnStdout: true, script: '''source $HOME/edx-venv/bin/activate
-            bash scripts/generic-ci-tests.sh'''
+            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '${sha1}']],
+                doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
+                userRemoteConfigs: [[credentialsId: 'jenkins-worker',
+                refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
+                url: 'git@github.com:edx/edx-platform.git']]]
+            console_output = sh(returnStdout: true, script: 'bash scripts/all-tests.sh').trim()
             dir('stdout') {
                 writeFile file: "${TEST_SUITE}-stdout.log", text: console_output
             }
@@ -19,7 +23,7 @@ def pythonTestCleanup() {
 }
 
 pipeline {
-    agent { label "jenkins-worker" }
+    agent { label "coverage-worker" }
     options {
         timestamps()
         timeout(60)
@@ -31,24 +35,11 @@ pipeline {
         XDIST_GIT_BRANCH = "${ghprbActualCommit}"
     }
     stages {
-        stage("Test setup"){
-            steps {
-                sshagent(credentials: ['jenkins-worker'], ignoreMissing: true) {
-                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '${sha1}']],
-                        doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
-                        userRemoteConfigs: [[credentialsId: 'jenkins-worker',
-                        refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
-                        url: 'git@github.com:edx/edx-platform.git']]]
-                    sh '''source scripts/jenkins-common.sh
-                    paver install_python_prereqs'''
-                }
-            }
-        }
         stage('Run Tests') {
             parallel {
                 stage("lms-unit") {
+                    agent { label "jenkins-worker" }
                     environment {
-                        // NO_PREREQ_INSTALL="True"
                         TEST_SUITE = "lms-unit"
                         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
                         XDIST_NUM_TASKS = 10
@@ -66,46 +57,48 @@ pipeline {
                         }
                     }
                 }
-                // stage("cms-unit") {
-                //     environment {
-                //         NO_PREREQ_INSTALL="True"
-                //         TEST_SUITE = "cms-unit"
-                //         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
-                //         XDIST_NUM_TASKS = 2
-                //     }
-                //     steps {
-                //         script {
-                //             runPythonTests()
-                //         }
-                //     }
-                //     post {
-                //         always {
-                //             script {
-                //                 pythonTestCleanup()
-                //             }
-                //         }
-                //     }
-                // }
-                // stage("commonlib-unit") {
-                //     environment {
-                //         NO_PREREQ_INSTALL="True"
-                //         TEST_SUITE = "commonlib-unit"
-                //         XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
-                //         XDIST_NUM_TASKS = 3
-                //     }
-                //     steps {
-                //         script {
-                //             runPythonTests()
-                //         }
-                //     }
-                //     post {
-                //         always {
-                //             script {
-                //                 pythonTestCleanup()
-                //             }
-                //         }
-                //     }
-                // }
+                stage("cms-unit") {
+                    agent { label "jenkins-worker" }
+                    environment {
+                        NO_PREREQ_INSTALL="True"
+                        TEST_SUITE = "cms-unit"
+                        XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
+                        XDIST_NUM_TASKS = 2
+                    }
+                    steps {
+                        script {
+                            runPythonTests()
+                        }
+                    }
+                    post {
+                        always {
+                            script {
+                                pythonTestCleanup()
+                            }
+                        }
+                    }
+                }
+                stage("commonlib-unit") {
+                    agent { label "jenkins-worker" }
+                    environment {
+                        NO_PREREQ_INSTALL="True"
+                        TEST_SUITE = "commonlib-unit"
+                        XDIST_FILE_NAME_PREFIX = "${TEST_SUITE}"
+                        XDIST_NUM_TASKS = 3
+                    }
+                    steps {
+                        script {
+                            runPythonTests()
+                        }
+                    }
+                    post {
+                        always {
+                            script {
+                                pythonTestCleanup()
+                            }
+                        }
+                    }
+                }
             }
         }
     }
