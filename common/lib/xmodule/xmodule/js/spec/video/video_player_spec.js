@@ -1079,16 +1079,16 @@ function(VideoPlayer, Initialize, HLS, _) {
                 state = jasmine.initializePlayer('video_all.html', {
                     streams: "0.5:7tqY6eQzVhE,1.0:cogebirgzzM,1.5:abcdefghijkl"
                 });
-                expect(state.config.hls_primary_playback_enabled).toBeFalsy();
+                expect(state.config.deprecate_youtube).toBeFalsy();
                 expect(YT.Player).toHaveBeenCalled();
                 expect(state.videoPlayer.player.hls).toBeUndefined();
             });
 
             it('does not load youtube if flag is enabled', function() {
                 state = jasmine.initializePlayer('video_all.html', {
-                    hls_primary_playback_enabled: true
+                    deprecate_youtube: true
                 });
-                expect(state.config.hls_primary_playback_enabled).toBeTruthy();
+                expect(state.config.deprecate_youtube).toBeTruthy();
                 expect(YT.Player).not.toHaveBeenCalled();
                 expect(state.videoPlayer.player.hls).toBeDefined();
             });
